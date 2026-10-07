@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASKE GOLD | Rize & Pide Gizem Platformu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                            900: '#422006'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #08080a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        #rain-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.25);
+        }
+        .gold-text-glow {
+            text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+        }
+    </style>
+</head>
+<body class="relative min-h-screen pb-20">
+
+    <!-- Yağmur Efekti Canvas -->
+    <canvas id="rain-canvas"></canvas>
+
+    <!-- Müzik Kontrol Çubuğu -->
+    <div class="fixed top-4 right-4 z-50 bg-black/80 backdrop-blur border border-gold-500/40 p-3 rounded-2xl shadow-xl flex items-center gap-3">
+        <button id="musicToggleBtn" class="bg-gold-500 hover:bg-gold-600 text-black px-4 py-2 rounded-xl font-bold transition flex items-center gap-2">
+            <i class="fa-solid fa-music"></i> <span id="musicBtnText">KV Müziği Çal</span>
+        </button>
+        <button id="rainAudioToggleBtn" class="bg-slate-800 hover:bg-slate-700 text-gold-400 p-2.5 rounded-xl border border-gold-500/20">
+            <i class="fa-solid fa-cloud-showers-heavy"></i>
+        </button>
+    </div>
+
+    <!-- SİTE KAPALI EKRANI (ADMIN KONTROLLÜ) -->
+    <div id="siteClosedModal" class="hidden fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center p-6 text-center">
+        <div class="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/30 mb-4 animate-pulse">
+            <i class="fa-solid fa-lock text-4xl text-red-500"></i>
+        </div>
+        <h1 class="text-3xl font-black text-red-500 tracking-wider mb-2">SİTE ERİŞİME KAPATILDI</h1>
+        <p class="text-slate-400 max-w-md mb-6">Yüzbaşı MASKE GOLD tarafından site bakıma alınmıştır. Giriş izni şu an askıdadır.</p>
+        <button onclick="openAdminModal()" class="text-xs text-slate-600 hover:text-gold-400 underline">Yönetici Girişi Yap</button>
+    </div>
+
+    <!-- ÜST HEADER -->
+    <header class="border-b border-gold-500/20 bg-black/60 backdrop-blur relative z-20 py-6">
+        <div class="max-w-6xl mx-auto px-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gold-500/20 border border-gold-500/50 rounded-xl flex items-center justify-center text-gold-400 text-2xl font-black">
+                    MG
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-gold-400 tracking-wide gold-text-glow">MASKE GOLD</h1>
+                    <p class="text-xs text-slate-400 tracking-widest">PİDENİN İÇİNDEKİ ALTIN KANAL - RİZE</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="openAdminModal()" class="bg-gold-500/10 hover:bg-gold-500/20 text-gold-400 border border-gold-500/40 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield"></i> Yüzbaşı Paneli
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK -->
+    <main class="max-w-6xl mx-auto px-4 py-8 relative z-20 space-y-12">
+
+        <!-- DİNAMİK YAZI ALANI 1 (KULLANICI DEĞİŞTİREBİLİR) -->
+        <section class="bg-slate-900/60 border border-gold-500/30 rounded-2xl p-6 gold-glow backdrop-blur relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-gold-500/10 rounded-full blur-2xl"></div>
+            <div class="flex items-center gap-2 text-gold-400 text-sm font-bold uppercase mb-2 tracking-widest">
+                <i class="fa-solid fa-pen-nib"></i> Kalemin İçindeki Akıl
+            </div>
+            <h2 id="customText1" class="text-2xl md:text-3xl font-bold text-slate-100 leading-snug">
+                "Aklım kalemin içinden çiçeği istediğin gibi ümitler verip oraya tıpa diyebilme paylaşım..."
+            </h2>
+            <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
+                <span>Rize Şifreli Kanalları</span>
+                <span class="text-gold-500/80">Güncelleme: <span id="textUpdateDate">Canlı</span></span>
+            </div>
+        </section>
+
+        <!-- PİDENİN İÇİNDEKİ ALTIN OYUNU -->
+        <section class="bg-black/40 border border-gold-500/20 rounded-2xl p-6 backdrop-blur">
+            <div class="text-center max-w-xl mx-auto mb-6">
+                <div class="inline-block p-3 bg-gold-500/10 rounded-full mb-3 text-gold-400 border border-gold-500/30">
+                    <i class="fa-solid fa-bread-slice text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gold-400">Pidenin İçindeki Altını Bul</h3>
+                <p class="text-sm text-slate-400 mt-1">Rize usulü fırından çıkan pidelerin içerisine gizlenmiş altını bulun!</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto" id="pideGrid">
+                <!-- Pide Kartları JavaScript ile Yüklenir -->
+            </div>
+            <div id="pideResult" class="text-center mt-4 font-bold text-lg hidden"></div>
+        </section>
+
+        <!-- YÜZBAŞI TARAFINDAN YÜKLENEN İÇERİKLER / PAYLAŞIMLAR -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-box-archive text-gold-400"></i> Yüzbaşı Paylaşımları & Dosyalar
+                </h3>
+                <span id="postCountBadge" class="bg-gold-500/20 text-gold-400 border border-gold-500/30 px-3 py-1 rounded-full text-xs font-bold">
+                    0 İçerik
+                </span>
+            </div>
+
+            <div id="postsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- İçerikler JS ile buraya dolacak -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ADMIN MODAL (ŞİFRE: ABDU1234) -->
+    <div id="adminModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-gold-500/50 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative">
+            
+            <!-- Modal Header -->
+            <div class="bg-black/60 p-4 border-b border-gold-500/20 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-gold-400 font-bold">
+                    <i class="fa-solid fa-user-shield"></i> Yüzbaşı Yönetim Paneli
+                </div>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+            </div>
+
+            <!-- Login Ekranı (Eğer Giriş Yapılmadıysa) -->
+            <div id="adminLoginForm" class="p-6 space-y-4">
+                <div class="text-center">
+                    <i class="fa-solid fa-key text-4xl text-gold-400 mb-2"></i>
+                    <h4 class="text-lg font-bold text-white">Giriş Şifresini Girin</h4>
+                    <p class="text-xs text-slate-400">MASKE GOLD kontrol paneline erişmek için yetki şifresi gereklidir.</p>
+                </div>
+                <div>
+                    <input type="password" id="adminPasswordInput" placeholder="Şifre (ABDU1234)" class="w-full bg-black/50 border border-gold-500/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold-500">
+                </div>
+                <button onclick="verifyAdminPassword()" class="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-3 rounded-xl transition">
+                    Panele Giriş Yap
+                </button>
+            </div>
+
+            <!-- Panel İçeriği (Giriş Başarılıysa) -->
+            <div id="adminPanelContent" class="hidden p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                
+                <!-- Site Açma/Kapama Düğmesi -->
+                <div class="flex items-center justify-between p-4 bg-black/40 border border-gold-500/20 rounded-xl">
+                    <div>
+                        <h5 class="font-bold text-white">Site Durumu</h5>
+                        <p class="text-xs text-slate-400">Siteyi tamamen açıp kapatabilirsiniz.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="siteStateToggle" onchange="toggleSiteState()" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
+                    </label>
+                </div>
+
+                <!-- İstatistikler -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div class="bg-black/30 border border-gold-500/20 p-3 rounded-xl text-center">
+                        <div class="text-2xl font-black text-gold-400" id="statTotalVisits">0</div>
+                        <div class="text-xs text-slate-400">Toplam Giriş</div>
+                    </div>
+                    <div class="bg-black/30 border border-gold-500/20 p-3 rounded-xl text-center">
+                        <div class="text-2xl font-black text-emerald-400" id="statRizeVisits">0</div>
+                        <div class="text-xs text-slate-400">Rize'den Giriş</div>
+                    </div>
+                    <div class="bg-black/30 border border-gold-500/20 p-3 rounded-xl text-center col-span-2 md:col-span-1">
+                        <div class="text-2xl font-black text-blue-400" id="statDownloads">0</div>
+                        <div class="text-xs text-slate-400">Toplam İndirme</div>
+                    </div>
+                </div>
+
+                <!-- Yazı Değiştirme -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gold-400 uppercase">Site İçi Ana Yazıyı Düzenle</label>
+                    <textarea id="adminCustomTextInput" rows="3" class="w-full bg-black/50 border border-gold-500/30 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-gold-500"></textarea>
+                    <button onclick="saveCustomText()" class="bg-gold-500 hover:bg-gold-600 text-black px-4 py-2 rounded-xl text-xs font-bold">
+                        Yazıyı Güncelle
+                    </button>
+                </div>
+
+                <!-- Yüzbaşı Olarak Yeni Paylaşım / Dosya Yükle -->
+                <div class="space-y-3 pt-4 border-t border-slate-800">
+                    <h5 class="font-bold text-white text-sm">Yüzbaşı Olarak İçerik/Paylaşım Yükle</h5>
+                    <input type="text" id="postTitleInput" placeholder="Paylaşım Başlığı" class="w-full bg-black/50 border border-gold-500/30 rounded-xl p-2.5 text-xs text-white">
+                    <textarea id="postContentInput" placeholder="İçerik açıklaması..." rows="2" class="w-full bg-black/50 border border-gold-500/30 rounded-xl p-2.5 text-xs text-white"></textarea>
+                    <input type="text" id="postDownloadUrlInput" placeholder="Dosya / İndirme Bağlantısı (Opsiyonel)" class="w-full bg-black/50 border border-gold-500/30 rounded-xl p-2.5 text-xs text-white">
+                    <button onclick="addPost()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs">
+                        Paylaşımı Yayınla
+                    </button>
+                </div>
+
+                <!-- Ziyaretçi Günlüğü (Rize & İndirmeler) -->
+                <div class="space-y-2 pt-4 border-t border-slate-800">
+                    <h5 class="font-bold text-white text-sm">Giriş ve İndirme Detayları</h5>
+                    <div id="visitorLogsContainer" class="max-h-40 overflow-y-auto space-y-1 bg-black/60 p-2 rounded-xl text-xs font-mono">
+                        <!-- Günlükler JS ile dolacak -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT MANTIĞI -->
+    <script>
+        // --- 1. YAĞMUR EFEKTİ CANVAS ---
+        const canvas = document.getElementById('rain-canvas');
+        const ctx = canvas.getContext('2d');
+        let drops = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 100; i++) {
+            drops.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 20 + 10,
+                speed: Math.random() * 8 + 4,
+                opacity: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function drawRain() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#eab308';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < drops.length; i++) {
+                let d = drops[i];
+                ctx.beginPath();
+                ctx.globalAlpha = d.opacity;
+                ctx.moveTo(d.x, d.y);
+                ctx.lineTo(d.x, d.y + d.length);
+                ctx.stroke();
+
+                d.y += d.speed;
+                if (d.y > canvas.height) {
+                    d.y = -d.length;
+                    d.x = Math.random() * canvas.width;
+                }
+            }
+            requestAnimationFrame(drawRain);
+        }
+        drawRain();
+
+        // --- 2. SES VE KURTLAR VADİSİ ATMOSFER SENTEZİ ---
+        let audioCtx = null;
+        let isMusicPlaying = false;
+        let kvInterval = null;
+
+        function playKVTheme() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            if (isMusicPlaying) {
+                clearInterval(kvInterval);
+                isMusicPlaying = false;
+                document.getElementById('musicBtnText').innerText = "KV Müziği Çal";
+                return;
+            }
+
+            isMusicPlaying = true;
+            document.getElementById('musicBtnText').innerText = "Müziği Durdur";
+
+            // Kurtlar Vadisi tarzı dramatik melodi dizilim senaryosu
+            const notes = [220, 233.08, 220, 207.65, 220, 261.63, 246.94, 220]; // A3, Bb3, A3, G#3...
+            let noteIdx = 0;
+
+            kvInterval = setInterval(() => {
+                if (!isMusicPlaying) return;
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+
+                noteIdx = (noteIdx + 1) % notes.length;
+            }, 600);
+        }
+
+        document.getElementById('musicToggleBtn').addEventListener('click', playKVTheme);
+
+        // --- 3. UYGULAMA DURUMU (LOCALSTORAGE) ---
+        let appState = {
+            isOpen: true,
+            customText: "Aklım kalemin içinden çiçeği istediğin gibi ümitler verip oraya tıpa diyebilme paylaşım...",
+            posts: [
+                {
+                    id: 1,
+                    title: "Rize Özel Şifreli Altın Kanalı Duyurusu",
+                    content: "Yüzbaşı MASKE GOLD tarafından yeni frekans aktif edildi. Yağmurlu günlerde pide içi gizli içerikler yayınlanacaktır.",
+                    date: "2026-05-18 14:30",
+                    downloadUrl: "#"
+                }
+            ],
+            logs: [],
+            totalVisits: 0,
+            rizeVisits: 0,
+            downloads: 0
+        };
+
+        function loadState() {
+            const saved = localStorage.getItem('maske_gold_state');
+            if (saved) {
+                try {
+                    appState = JSON.parse(saved);
+                } catch(e){}
+            }
+            // Ziyaret kaydı simülasyonu
+            recordVisit();
+            renderApp();
+        }
+
+        function saveState() {
+            localStorage.setItem('maske_gold_state', JSON.stringify(appState));
+            renderApp();
+        }
+
+        function recordVisit() {
+            const isRize = Math.random() > 0.4; // Tahmini Rize tespiti simülasyonu
+            const now = new Date();
+            const timeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR');
+
+            appState.totalVisits++;
+            if (isRize) appState.rizeVisits++;
+
+            appState.logs.unshift({
+                time: timeStr,
+                location: isRize ? "Rize / Türkiye" : "Diğer Şehir",
+                action: "Siteye Giriş Yapıldı",
+                isRize: isRize
+            });
+
+            if (appState.logs.length > 50) appState.logs.pop();
+            saveState();
+        }
+
+        function renderApp() {
+            // Site Açık/Kapalı Kontrolü
+            const modal = document.getElementById('siteClosedModal');
+            if (!appState.isOpen) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+
+            // Yazı güncelleme
+            document.getElementById('customText1').innerText = appState.customText;
+            document.getElementById('adminCustomTextInput').value = appState.customText;
+            document.getElementById('siteStateToggle').checked = appState.isOpen;
+
+            // İstatistikler
+            document.getElementById('statTotalVisits').innerText = appState.totalVisits;
+            document.getElementById('statRizeVisits').innerText = appState.rizeVisits;
+            document.getElementById('statDownloads').innerText = appState.downloads;
+
+            // Paylaşımlar
+            const postsContainer = document.getElementById('postsContainer');
+            document.getElementById('postCountBadge').innerText = `${appState.posts.length} İçerik`;
+            
+            postsContainer.innerHTML = appState.posts.map(post => `
+                <div class="bg-slate-900/80 border border-gold-500/20 rounded-xl p-4 space-y-2 hover:border-gold-500/50 transition">
+                    <div class="flex justify-between items-start">
+              
